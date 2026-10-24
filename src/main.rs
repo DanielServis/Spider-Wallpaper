@@ -1,6 +1,7 @@
 use std::{fs, ptr};
 use glfw::Context;
-use gl::{FRONT_AND_BACK, LINE, types::*};
+use gl::types::*;
+use glam::{Vec3, Mat4};
 use std::ffi::CString;
 
 mod things;
@@ -119,15 +120,34 @@ fn main() {
     let projection_name = CString::new("projection").unwrap();
     let projection_loc: GLint = unsafe { gl::GetUniformLocation(shader_program, projection_name.as_ptr()) };
 
-    unsafe { gl::PolygonMode(FRONT_AND_BACK, LINE) };
+    unsafe { gl::PolygonMode(gl::FRONT_AND_BACK, gl::LINE) };
+
+    let spider = Spider::new(0.0, 0.0, 0.0);
 
     while !window.should_close() {
         unsafe {
             gl::ClearColor(0.133 ,0.141, 0.212, 1.0);
-            gl::Clear(gl::COLOR_BUFFER_BIT);
-
+            gl::Clear(gl::COLOR_BUFFER_BIT | gl::DEPTH_BUFFER_BIT);
             gl::UseProgram(shader_program);
         }
+
+        let fov = 45.0_f32.to_radians();
+        let aspect = 1.0;
+        let near = 0.1_f32;
+        let far = 1000.0_f32;
+
+        let view = Mat4::from_rotation_x(45.0_f32.to_radians())
+            * Mat4::from_translation(Vec3::new(0.0, -150.0, -175.0));
+
+        let projection = glam::camera::rh::proj::opengl::perspective(fov, aspect, near, far);
+
+        unsafe {
+            gl::UniformMatrix4fv(view_loc, 1, gl::FALSE, view.to_cols_array().as_ptr());
+            gl::UniformMatrix4fv(projection_loc, 1, gl::FALSE, projection.to_cols_array().as_ptr());
+        }
+
+        spider.draw(model_loc);
+
         window.swap_buffers();
         glfw.poll_events();
     }

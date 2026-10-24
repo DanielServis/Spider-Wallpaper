@@ -7,6 +7,7 @@ pub struct Mesh {
     pub indices: Vec<u32>,
 }
 
+#[derive(Default, Clone, Copy)]
 pub struct Transform {
     pub x: f32,
     pub y: f32,
@@ -53,7 +54,7 @@ pub struct Model {
 }
 
 impl Model {
-    pub fn new(mesh: &Mesh) -> Self {
+    pub fn new(mesh: Mesh) -> Self {
         let (mut vao, mut vbo, mut ebo) = (0, 0, 0);
         unsafe {
             gl::GenVertexArrays(1, &mut vao);
