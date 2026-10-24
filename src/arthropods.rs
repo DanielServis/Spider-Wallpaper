@@ -2,87 +2,126 @@ use gl::types::*;
 use std::mem::size_of;
 use glam::{Vec3, Mat4, EulerRot};
 
-pub struct Mesh {
-    pub vertices: Vec<f32>,
-    pub indices: Vec<u32>,
+use crate::things::{Transform, Motive, Mesh, Model};
+
+pub struct LegSeg {
+    transform: Transform,
+    length: f32,
 }
 
-pub struct Transform {
-    pub x: f32,
-    pub y: f32,
-    pub z: f32,
-    pub pit: f32,
-    pub yaw: f32,
-    pub rol: f32,
+pub struct LegAttach {
+    offset: Vec3,
+    base_yaw: f32,
 }
 
-impl Transform {
-    pub fn to_matrix(&self) -> Mat4 {
-        Mat4::from_translation(Vec3::new(self.x, self.y, self.z))
-            * Mat4::from_euler(EulerRot::YXZ, self.yaw, self.pit, self.rol)
-    }
+pub struct Leg {
+    coxa: LegSeg,
+    femur: LegSeg,
+    tibia: LegSeg,
+    tarsus: LegSeg,
+
+    rest_position: Vec3,
+    current_target: Vec3,
+    step_start: Vec3,
+    step_end: Vec3,
+    step_offset: f32,
+    step_time: f32,
+    step_cool: f32,
 }
 
-pub struct Model {
-    vao: GLuint,
-    vbo: GLuint,
-    ebo: GLuint,
-    index_count: GLsizei,
+pub struct Spider {
+    body_model: Model,
+    legseg_model: Model,
+    pub transform: Transform,
+    pub motive: Motive,
+    legs: [Leg; 8],
 }
 
-impl Model {
-    pub fn new(mesh: &Mesh) -> Self {
-        let (mut vao, mut vbo, mut ebo) = (0, 0, 0);
-        unsafe {
-            gl::GenVertexArrays(1, &mut vao);
-            gl::GenBuffers(1, &mut vbo);
-            gl::GenBuffers(1, &mut ebo);
-
-            gl::BindVertexArray(vao);
-
-            gl::BindBuffer(gl::ARRAY_BUFFER, vbo);
-            gl::BufferData(
-                gl::ARRAY_BUFFER,
-                (mesh.vertices.len() * size_of::<f32>()) as GLsizeiptr,
-                mesh.vertices.as_ptr() as *const _,
-                gl::STATIC_DRAW,
-            );
-
-            gl::BindBuffer(gl::ELEMENT_ARRAY_BUFFER, ebo);
-            gl::BufferData(
-                gl::ELEMENT_ARRAY_BUFFER,
-                (mesh.indices.len() * size_of::<u32>()) as GLsizeiptr,
-                mesh.indices.as_ptr() as *const _,
-                gl::STATIC_DRAW,
-            );
-
-            gl::VertexAttribPointer(
-                0, 3, gl::FLOAT, gl::FALSE,
-                (3 * size_of::<f32>()) as GLsizei,
-                std::ptr::null(),
-            );
-            gl::EnableVertexAttribArray(0);
-
-            gl::BindVertexArray(0);
+impl Spider {
+    /*pub fn new(x: f32, y: f32, z: f32) -> Self {
+        for i in 0..8 {
+            
         }
-        Self { vao, vbo, ebo, index_count: mesh.indices.len() as GLsizei }
+
+        Spider {
+            transform: Transform::new(x, y, z, 0.0, 0.0, 0.0),
+            motive: Motive::new(),
+        }
+    }*/
+
+    pub fn draw(&self, model_loc: GLint) {
+        let body_mat: Mat4 = self.transform.to_matrix();
+        unsafe { gl::UniformMatrix4fv(model_loc, 1, gl::FALSE, body_mat.as_ref().as_ptr()) };
+        self.body_model.draw();
+
+        for leg in &self.legs {
+            let coxa_mat = body_mat * leg.coxa.transform.to_matrix();
+            let femur_mat = coxa_mat * leg.femur.transform.to_matrix();
+            let tibia_mat = femur_mat * leg.tibia.transform.to_matrix();
+            let tarsus_mat = tibia_mat * leg.tarsus.transform.to_matrix();
+
+            struct SegDraw {
+                mat: *const Mat4,
+                length: f32,
+            }
+            let segs: [SegDraw; 4] = [
+                SegDraw {mat: &coxa_mat, length: leg.coxa.length},
+                SegDraw {mat: &femur_mat, length: leg.femur.length},
+                SegDraw {mat: &tibia_mat, length: leg.tibia.length},
+                SegDraw {mat: &tarsus_mat, length: leg.tarsus.length},
+            ];
+
+            for seg in &segs {
+                unsafe {
+                    let final_mat = *seg.mat * Mat4::from_scale(Vec3::new(1.0, seg.length, 1.0));
+                    gl::UniformMatrix4fv(model_loc, 1, gl::FALSE, final_mat.as_ref().as_ptr());
+                }
+                self.legseg_model.draw();
+            }
+        }
     }
 
-    pub fn draw(&self) {
-        unsafe {
-            gl::BindVertexArray(self.vao);
-            gl::DrawElements(gl::TRIANGLES, self.index_count, gl::UNSIGNED_INT, std::ptr::null());
-            gl::BindVertexArray(0);
-        }
+    pub fn update() {
+
+    }
+
+    pub fn behave() {
+
+    }
+
+    fn create_body_mesh() -> Mesh {
+        let mut mesh: Mesh;
+
+        mesh.vertices = [
+
+        ];
+
+        mesh.indices = [
+
+        ];
+
+        mesh
+    }
+
+    fn create_legseg_mesh() -> Mesh {
+        let mut mesh: Mesh;
+
+        mesh.vertices = [
+
+        ];
+
+        mesh.indices = [
+
+        ];
+
+        mesh
     }
 }
 
-impl Drop for Model {
+impl Drop for Spider {
     fn drop(&mut self) {
         unsafe {
-            gl::DeleteVertexArrays(1, &self.vao);
-            gl::DeleteBuffers(1, &self.vbo);
-            gl::DeleteBuffers(1, &self.ebo);
+
         }
-    }
+    } 
 }

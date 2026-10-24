@@ -3,9 +3,10 @@ use glfw::Context;
 use gl::{FRONT_AND_BACK, LINE, types::*};
 use std::ffi::CString;
 
+mod things;
 mod arthropods;
 
-use arthropods::{Transform, Mesh, Model};
+use arthropods::{Spider};
 
 fn compile_shader(kind: GLenum, source: &str) -> Result<GLuint, String> {
     let c_src = CString::new(source).map_err(|e| e.to_string())?;
