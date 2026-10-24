@@ -1,11 +1,11 @@
-use std::{io, fs, ptr};
+use std::{fs, ptr};
 use glfw::Context;
 use gl::{FRONT_AND_BACK, LINE, types::*};
 use std::ffi::CString;
 
-fn load_file(path: &str) -> io::Result<String> {
-    fs::read_to_string(path)
-}
+mod arthropods;
+
+use arthropods::{Transform, Mesh, Model};
 
 fn compile_shader(kind: GLenum, source: &str) -> Result<GLuint, String> {
     let c_src = CString::new(source).map_err(|e| e.to_string())?;
