@@ -122,7 +122,10 @@ fn main() {
 
     unsafe { gl::PolygonMode(gl::FRONT_AND_BACK, gl::LINE) };
 
-    let spider = Spider::new(0.0, 0.0, 0.0);
+    let mut delta_time;
+    let mut last_time = 0.0;
+
+    let mut spider = Spider::new(0.0, 0.0, 0.0);
 
     while !window.should_close() {
         unsafe {
@@ -146,6 +149,13 @@ fn main() {
             gl::UniformMatrix4fv(projection_loc, 1, gl::FALSE, projection.to_cols_array().as_ptr());
         }
 
+        let current_time: f32 = glfw.get_time() as f32;
+        delta_time = current_time - last_time;
+        last_time = current_time;
+
+        spider.motive.speed = 5.0;
+        spider.transform.x += spider.motive.speed * delta_time;
+        spider.update(delta_time);
         spider.draw(model_loc);
 
         window.swap_buffers();
