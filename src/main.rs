@@ -153,8 +153,7 @@ fn main() {
         delta_time = current_time - last_time;
         last_time = current_time;
 
-        spider.motive.speed = 5.0;
-        spider.transform.x += spider.motive.speed * delta_time;
+        spider.behave(delta_time);
         spider.update(delta_time);
         spider.draw(model_loc);
 

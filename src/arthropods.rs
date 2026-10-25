@@ -1,6 +1,7 @@
 use gl::types::*;
 use std::{f32::consts::PI, mem::size_of};
 use glam::{Vec3, Vec4, Quat, Mat3, Mat4};
+use rand::{Rng, RngExt};
 
 use crate::things::{Transform, Motive, Mesh, Model};
 
@@ -144,9 +145,10 @@ impl Spider {
     }
 
     pub fn update(&mut self, delta_time: f32) {
-        let STEP_TRIGGER_DIST = 10.0;
+        const STEP_TRIGGER_DIST: f32 = 10.0;
+        const STEP_HEIGHT: f32 = 5.0;
+
         let step_speed = 3.0 * (self.motive.speed + 1.0);
-        let STEP_HEIGHT = 5.0;
         let group_stagger = 0.1 * (10.0 / self.motive.speed);
 
         self.anim_time += delta_time;
@@ -189,6 +191,42 @@ impl Spider {
 
             let target = leg.current_target;
             Self::solve_leg_ik(leg, target, inv_body, delta_time);
+        }
+    }
+
+    pub fn behave(&mut self, delta_time: f32) {
+        let mut rng = rand::rng();
+
+        if self.motive.move_cool <= 0.0 {
+            self.motive.move_time -= delta_time;
+            if self.motive.move_time <= 0.0 {
+                self.motive.move_cool = rng.random_range(0.0..2.0);
+            }
+        }
+        else {
+            self.motive.speed = 0.0;
+            self.motive.move_cool -= delta_time;
+            if self.motive.move_cool <= 0.01 {
+                self.motive.move_time = rng.random_range(3.0..10.0);
+                self.motive.speed = rng.random_range(5.0..50.0);
+            }
+        }
+
+        let face_x = -self.transform.yaw.sin() * self.transform.pit.cos();
+        let face_z = -self.transform.yaw.cos() * self.transform.pit.cos();
+
+        let facing_out = 
+            (self.transform.x > 120.0 && face_x > 0.0) ||
+            (self.transform.x < -120.0 && face_x < 0.0) ||
+            (self.transform.z > 80.0 && face_z > 0.0) ||
+            (self.transform.z < -80.0 && face_z < 0.0);
+
+        if facing_out {
+            self.transform.yaw += delta_time;
+        }
+        else {
+            self.transform.x += face_x * self.motive.speed * delta_time;
+            self.transform.z += face_z * self.motive.speed * delta_time;
         }
     }
 
@@ -299,10 +337,6 @@ impl Spider {
         };
 
         Vec3::new(h.x * pitch.cos(), -pitch.sin(), h.z * pitch.cos())
-    }
-
-    fn solve_ik() {
-
     }
 
     fn set_seg_angles(transform: &mut Transform, parent_world_rot: Mat3, from_pos: Vec3, to_pos: Vec3, delta_time: f32) {
