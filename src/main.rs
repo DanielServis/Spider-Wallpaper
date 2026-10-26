@@ -120,7 +120,7 @@ fn main() {
     let projection_name = CString::new("projection").unwrap();
     let projection_loc: GLint = unsafe { gl::GetUniformLocation(shader_program, projection_name.as_ptr()) };
 
-    unsafe { gl::PolygonMode(gl::FRONT_AND_BACK, gl::LINE) };
+    unsafe { gl::PolygonMode(gl::FRONT_AND_BACK, gl::FILL) };
 
     let mut delta_time;
     let mut last_time = 0.0;
@@ -142,7 +142,7 @@ fn main() {
         let far = 1000.0_f32;
 
         let view = Mat4::from_rotation_x(45.0_f32.to_radians())
-            * Mat4::from_translation(Vec3::new(0.0, -200.0, -250.0));
+            * Mat4::from_translation(Vec3::new(30.0, -200.0, -250.0));
 
         let projection = glam::camera::rh::proj::opengl::perspective(fov, aspect, near, far);
 

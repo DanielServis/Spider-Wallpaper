@@ -222,7 +222,7 @@ impl CellarSpider {
             let scale = leg_scale[i];
             let mut leg = Leg::default();
 
-            let outward_dir = Vec3::new(att.offset.x, 0.0, att.offset.z).normalize(); 
+            let outward_dir = Vec3::new(-att.base_yaw.sin(), 0.0, -att.base_yaw.cos());
 
             leg.coxa_base_yaw = att.base_yaw;
 
@@ -402,7 +402,7 @@ impl CellarSpider {
             LegAttach { offset: Vec3::new(0.25, -0.5, 0.3), base_yaw: (-140.0_f32).to_radians() },
             LegAttach { offset: Vec3::new(0.25, -0.5, 0.0), base_yaw: (-110.0_f32).to_radians() },
             LegAttach { offset: Vec3::new(0.25, -0.5, -0.2), base_yaw: (-80.0_f32).to_radians() },
-            LegAttach { offset: Vec3::new(0.25, -0.5, -0.75), base_yaw: (-46.0_f32).to_radians() },
+            LegAttach { offset: Vec3::new(0.25, -0.5, -0.75), base_yaw: (-45.0_f32).to_radians() },
             LegAttach { offset: Vec3::new(-0.25, -0.5, 0.3), base_yaw: (140.0_f32).to_radians() },
             LegAttach { offset: Vec3::new(-0.25, -0.5, 0.0), base_yaw: (110.0_f32).to_radians() },
             LegAttach { offset: Vec3::new(-0.25, -0.5, -0.2), base_yaw: (80.0_f32).to_radians() },
@@ -670,13 +670,14 @@ impl HouseSpider {
             let scale = leg_scale[i];
             let mut leg = Leg::default();
 
-            let outward_dir = Vec3::new(att.offset.x, 0.0, att.offset.z).normalize();
-            let aligned_yaw = outward_dir.x.atan2(-outward_dir.z);
+            let outward_dir = Vec3::new(-att.base_yaw.sin(), 0.0, -att.base_yaw.cos());
+
+            leg.coxa_base_yaw = att.base_yaw;
 
             leg.coxa.transform.x = att.offset.x;
             leg.coxa.transform.y = att.offset.y;
             leg.coxa.transform.z = att.offset.z;
-            leg.coxa.transform.yaw = aligned_yaw;
+            leg.coxa.transform.yaw = att.base_yaw;
             leg.coxa.transform.pit = 20.0_f32.to_radians();
             leg.coxa.length = 6.0 * scale;
 
@@ -846,14 +847,14 @@ impl HouseSpider {
 
     fn create_legattach() -> [LegAttach; 8] {
         [
-            LegAttach { offset: Vec3::new(0.25, -0.5, 0.3), base_yaw: (-60.0_f32).to_radians() },
-            LegAttach { offset: Vec3::new(0.25, -0.5, 0.0), base_yaw: (-30.0_f32).to_radians() },
-            LegAttach { offset: Vec3::new(0.25, -0.5, -0.2), base_yaw: (30.0_f32).to_radians() },
-            LegAttach { offset: Vec3::new(0.25, -0.5, -0.75), base_yaw: (60.0_f32).to_radians() },
-            LegAttach { offset: Vec3::new(-0.25, -0.5, 0.3), base_yaw: (-120.0_f32).to_radians() },
-            LegAttach { offset: Vec3::new(-0.25, -0.5, 0.0), base_yaw: (-150.0_f32).to_radians() },
-            LegAttach { offset: Vec3::new(-0.25, -0.5, -0.2), base_yaw: (150.0_f32).to_radians() },
-            LegAttach { offset: Vec3::new(-0.25, -0.5, -0.75), base_yaw: (120.0_f32).to_radians() },
+            LegAttach { offset: Vec3::new(0.25, -0.5, 0.3), base_yaw: (-140.0_f32).to_radians() },
+            LegAttach { offset: Vec3::new(0.25, -0.5, 0.0), base_yaw: (-110.0_f32).to_radians() },
+            LegAttach { offset: Vec3::new(0.25, -0.5, -0.2), base_yaw: (-70.0_f32).to_radians() },
+            LegAttach { offset: Vec3::new(0.25, -0.5, -0.75), base_yaw: (-40.0_f32).to_radians() },
+            LegAttach { offset: Vec3::new(-0.25, -0.5, 0.3), base_yaw: (140.0_f32).to_radians() },
+            LegAttach { offset: Vec3::new(-0.25, -0.5, 0.0), base_yaw: (110.0_f32).to_radians() },
+            LegAttach { offset: Vec3::new(-0.25, -0.5, -0.2), base_yaw: (70.0_f32).to_radians() },
+            LegAttach { offset: Vec3::new(-0.25, -0.5, -0.75), base_yaw: (40.0_f32).to_radians() },
         ]
     }
 
@@ -1118,27 +1119,28 @@ impl HouseCentipede {
             let mut leg = Leg::default();
 
             let outward_dir = Vec3::new(att.offset.x, 0.0, att.offset.z).normalize();
-            let aligned_yaw = outward_dir.x.atan2(-outward_dir.z);
+
+            leg.coxa_base_yaw = att.base_yaw;
 
             leg.coxa.transform.x = att.offset.x;
             leg.coxa.transform.y = att.offset.y;
             leg.coxa.transform.z = att.offset.z;
-            leg.coxa.transform.yaw = aligned_yaw;
+            leg.coxa.transform.yaw = att.base_yaw;
             leg.coxa.transform.pit = 20.0_f32.to_radians();
-            leg.coxa.length = 6.0 * scale;
+            leg.coxa.length = 4.0 * scale;
 
             leg.femur.transform.x = 0.0;
             leg.femur.transform.y = -leg.coxa.length;
             leg.femur.transform.z = 0.0;
             leg.femur.transform.pit = 40.0_f32.to_radians();
-            leg.femur.length = 6.0 * scale;
+            leg.femur.length = 4.0 * scale;
 
             leg.tibia.transform.y = -leg.femur.length;
             leg.tibia.transform.pit = (-70.0_f32).to_radians();
-            leg.tibia.length = 8.0 * scale;
+            leg.tibia.length = 6.0 * scale;
 
             leg.tarsus.transform.y = -leg.tibia.length;
-            leg.tarsus.length = 1.5 * scale;
+            leg.tarsus.length = 1.0 * scale;
 
             let leg_reach = leg.coxa.length + leg.femur.length
                 + leg.tibia.length + leg.tarsus.length;
@@ -1218,7 +1220,7 @@ impl HouseCentipede {
         let inv_body = model.inverse();
 
         for (i, leg) in self.legs.iter_mut().enumerate() {
-            let group_a = i % 2 == 0;
+            let group_a = (i % 15) % 2 == 0;
 
             let ideal_world_position: Vec3 = (model
                 * Vec4::from((leg.rest_position, 1.0))).truncate();
@@ -1296,7 +1298,7 @@ impl HouseCentipede {
             LegAttach { offset: Vec3::new(0.25, -0.5,  2.25), base_yaw: (-160.0_f32).to_radians() },
             LegAttach { offset: Vec3::new(0.25, -0.5,  1.8393), base_yaw: (-140.0_f32).to_radians() },
             LegAttach { offset: Vec3::new(0.25, -0.5,  1.4286), base_yaw: (-120.0_f32).to_radians() },
-            LegAttach { offset: Vec3::new(0.25, -0.5,  1.0179), base_yaw: (-100.0_f32).to_radians() },
+            LegAttach { offset: Vec3::new(0.25, -0.5,  1.0179), base_yaw: (-90.0_f32).to_radians() },
             LegAttach { offset: Vec3::new(0.25, -0.5,  0.6071), base_yaw: (-90.0_f32).to_radians() },
             LegAttach { offset: Vec3::new(0.25, -0.5,  0.1964), base_yaw: (-90.0_f32).to_radians() },
             LegAttach { offset: Vec3::new(0.25, -0.5, -0.2143), base_yaw: (-90.0_f32).to_radians() },
@@ -1304,15 +1306,15 @@ impl HouseCentipede {
             LegAttach { offset: Vec3::new(0.25, -0.5, -1.0357), base_yaw: (-90.0_f32).to_radians() },
             LegAttach { offset: Vec3::new(0.25, -0.5, -1.4464), base_yaw: (-90.0_f32).to_radians() },
             LegAttach { offset: Vec3::new(0.25, -0.5, -1.8571), base_yaw: (-90.0_f32).to_radians() },
-            LegAttach { offset: Vec3::new(0.25, -0.5, -2.2679), base_yaw: (-70.0_f32).to_radians() },
-            LegAttach { offset: Vec3::new(0.25, -0.5, -2.6786), base_yaw: (-50.0_f32).to_radians() },
-            LegAttach { offset: Vec3::new(0.25, -0.5, -3.0893), base_yaw: (-30.0_f32).to_radians() },
-            LegAttach { offset: Vec3::new(0.25, -0.5, -3.5), base_yaw: (-10.0_f32).to_radians() },
+            LegAttach { offset: Vec3::new(0.25, -0.5, -2.2679), base_yaw: (-90.0_f32).to_radians() },
+            LegAttach { offset: Vec3::new(0.25, -0.5, -2.6786), base_yaw: (-60.0_f32).to_radians() },
+            LegAttach { offset: Vec3::new(0.25, -0.5, -3.0893), base_yaw: (-40.0_f32).to_radians() },
+            LegAttach { offset: Vec3::new(0.25, -0.5, -3.5), base_yaw: (-20.0_f32).to_radians() },
 
-            LegAttach { offset: Vec3::new(-0.25, -0.5,  2.25), base_yaw: (10.0_f32).to_radians() },
-            LegAttach { offset: Vec3::new(-0.25, -0.5,  1.8393), base_yaw: (30.0_f32).to_radians() },
-            LegAttach { offset: Vec3::new(-0.25, -0.5,  1.4286), base_yaw: (50.0_f32).to_radians() },
-            LegAttach { offset: Vec3::new(-0.25, -0.5,  1.0179), base_yaw: (70.0_f32).to_radians() },
+            LegAttach { offset: Vec3::new(-0.25, -0.5,  2.25), base_yaw: (160.0_f32).to_radians() },
+            LegAttach { offset: Vec3::new(-0.25, -0.5,  1.8393), base_yaw: (140.0_f32).to_radians() },
+            LegAttach { offset: Vec3::new(-0.25, -0.5,  1.4286), base_yaw: (120.0_f32).to_radians() },
+            LegAttach { offset: Vec3::new(-0.25, -0.5,  1.0179), base_yaw: (100.0_f32).to_radians() },
             LegAttach { offset: Vec3::new(-0.25, -0.5,  0.6071), base_yaw: (90.0_f32).to_radians() },
             LegAttach { offset: Vec3::new(-0.25, -0.5,  0.1964), base_yaw: (90.0_f32).to_radians() },
             LegAttach { offset: Vec3::new(-0.25, -0.5, -0.2143), base_yaw: (90.0_f32).to_radians() },
@@ -1320,10 +1322,10 @@ impl HouseCentipede {
             LegAttach { offset: Vec3::new(-0.25, -0.5, -1.0357), base_yaw: (90.0_f32).to_radians() },
             LegAttach { offset: Vec3::new(-0.25, -0.5, -1.4464), base_yaw: (90.0_f32).to_radians() },
             LegAttach { offset: Vec3::new(-0.25, -0.5, -1.8571), base_yaw: (90.0_f32).to_radians() },
-            LegAttach { offset: Vec3::new(-0.25, -0.5, -2.2679), base_yaw: (100.0_f32).to_radians() },
-            LegAttach { offset: Vec3::new(-0.25, -0.5, -2.6786), base_yaw: (120.0_f32).to_radians() },
-            LegAttach { offset: Vec3::new(-0.25, -0.5, -3.0893), base_yaw: (140.0_f32).to_radians() },
-            LegAttach { offset: Vec3::new(-0.25, -0.5, -3.5), base_yaw: (160.0_f32).to_radians() },
+            LegAttach { offset: Vec3::new(-0.25, -0.5, -2.2679), base_yaw: (90.0_f32).to_radians() },
+            LegAttach { offset: Vec3::new(-0.25, -0.5, -2.6786), base_yaw: (60.0_f32).to_radians() },
+            LegAttach { offset: Vec3::new(-0.25, -0.5, -3.0893), base_yaw: (40.0_f32).to_radians() },
+            LegAttach { offset: Vec3::new(-0.25, -0.5, -3.5), base_yaw: (20.0_f32).to_radians() },
         ]
     }
 
