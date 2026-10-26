@@ -7,7 +7,7 @@ use std::ffi::CString;
 mod things;
 mod arthropods;
 
-use arthropods::{Spider};
+use arthropods::{CellarSpider, HouseSpider, HouseCentipede};
 
 fn compile_shader(kind: GLenum, source: &str) -> Result<GLuint, String> {
     let c_src = CString::new(source).map_err(|e| e.to_string())?;
@@ -125,7 +125,9 @@ fn main() {
     let mut delta_time;
     let mut last_time = 0.0;
 
-    let mut spider = Spider::new(0.0, 0.0, 0.0);
+    let mut cellar_spider = CellarSpider::new(0.0, 0.0, 0.0);
+    let mut house_spider = HouseSpider::new(-3.0, 0.0, 0.0);
+    let mut house_centipede = HouseCentipede::new(3.0, 0.0, 0.0);
 
     while !window.should_close() {
         unsafe {
@@ -140,7 +142,7 @@ fn main() {
         let far = 1000.0_f32;
 
         let view = Mat4::from_rotation_x(45.0_f32.to_radians())
-            * Mat4::from_translation(Vec3::new(0.0, -150.0, -175.0));
+            * Mat4::from_translation(Vec3::new(0.0, -200.0, -250.0));
 
         let projection = glam::camera::rh::proj::opengl::perspective(fov, aspect, near, far);
 
@@ -153,9 +155,17 @@ fn main() {
         delta_time = current_time - last_time;
         last_time = current_time;
 
-        spider.behave(delta_time);
-        spider.update(delta_time);
-        spider.draw(model_loc);
+        cellar_spider.behave(delta_time);
+        cellar_spider.update(delta_time);
+        cellar_spider.draw(model_loc);
+
+        house_spider.behave(delta_time);
+        house_spider.update(delta_time);
+        house_spider.draw(model_loc);
+
+        house_centipede.behave(delta_time);
+        house_centipede.update(delta_time);
+        house_centipede.draw(model_loc);
 
         window.swap_buffers();
         glfw.poll_events();
