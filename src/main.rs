@@ -126,8 +126,8 @@ fn main() {
     let mut last_time = 0.0;
 
     let mut cellar_spider = CellarSpider::new(0.0, 0.0, 0.0);
-    let mut house_spider = HouseSpider::new(-3.0, 0.0, 0.0);
-    let mut house_centipede = HouseCentipede::new(3.0, 0.0, 0.0);
+    let mut house_spider = HouseSpider::new(-100.0, 0.0, 0.0);
+    let mut house_centipede = HouseCentipede::new(100.0, 0.0, 0.0);
 
     while !window.should_close() {
         unsafe {

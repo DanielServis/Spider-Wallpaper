@@ -1145,7 +1145,7 @@ impl HouseCentipede {
             let leg_reach = leg.coxa.length + leg.femur.length
                 + leg.tibia.length + leg.tarsus.length;
             let horiz_dist = leg_reach * 1.0;
-            let drop_dist = leg_reach * 0.2;
+            let drop_dist = leg_reach * 0.1;
 
             leg.rest_position = att.offset
                 + outward_dir * horiz_dist
