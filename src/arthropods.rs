@@ -1234,7 +1234,7 @@ impl HouseCentipede {
 
     pub fn update(&mut self, delta_time: f32) {
         const STEP_TRIGGER_DIST: f32 = 2.0;
-        const STEP_HEIGHT: f32 = 1.0;
+        const STEP_HEIGHT: f32 = 2.0;
 
         let step_speed = 10.0 * (self.motive.speed + 1.0);
         let group_stagger = 0.01 * (10.0 / self.motive.speed);

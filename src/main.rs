@@ -97,11 +97,15 @@ fn main() {
     glfw.window_hint(glfw::WindowHint::ContextVersion(3, 3));
     glfw.window_hint(glfw::WindowHint::OpenGlProfile(glfw::OpenGlProfileHint::Core));
 
-    let (mut window, _events) = glfw.create_window(800, 600, "", glfw::WindowMode::Windowed).unwrap();
+    let (mut window, _events) = glfw.create_window(800, 600, "arthropods", glfw::WindowMode::Windowed).unwrap();
     window.make_current();
+    window.set_framebuffer_size_polling(true);
     gl::load_with(|s| {
         window.get_proc_address(s).map_or(std::ptr::null(), |f| f as *const _)
     });
+
+    let (fb_w, fb_h) = window.get_framebuffer_size();
+    unsafe { gl::Viewport(0, 0, fb_w, fb_h) };
 
     unsafe { gl::Enable(gl::DEPTH_TEST) }; 
 
@@ -137,12 +141,13 @@ fn main() {
         }
 
         let fov = 45.0_f32.to_radians();
-        let aspect = 1.0;
+        let (fb_w, fb_h) = window.get_framebuffer_size();
+        let aspect = fb_w as f32 / fb_h as f32;
         let near = 0.1_f32;
         let far = 1000.0_f32;
 
         let view = Mat4::from_rotation_x(45.0_f32.to_radians())
-            * Mat4::from_translation(Vec3::new(30.0, -200.0, -250.0));
+            * Mat4::from_translation(Vec3::new(0.0, -150.0, -175.0));
 
         let projection = glam::camera::rh::proj::opengl::perspective(fov, aspect, near, far);
 
