@@ -1,8 +1,9 @@
-use std::{fs, ptr};
+use std::{fs, mem, ptr};
 use glfw::Context;
 use gl::types::*;
 use glam::{Vec3, Mat4};
-use std::ffi::CString;
+use std::{env, ffi::CString};
+use x11::xlib;
 
 mod things;
 mod arthropods;
@@ -93,11 +94,51 @@ fn create_shader_program(vertex_path: &str, fragment_path: &str) -> Result<GLuin
 }
 
 fn main() {
+    let argv: Vec<String> = env::args().collect();
+    let argc = argv.len();
+
+    let embedded: bool = argc > 1;
+    let mut parent: xlib::Window = 0;
+    let mut x11dpy: *mut xlib::Display = ptr::null_mut();
+    let mut window_width = 800;
+    let mut window_height = 600;
+
+    if embedded {
+        unsafe {
+            parent = parse_int::parse(&argv[1]).expect("invalid window id sucka"); 
+            x11dpy = xlib::XOpenDisplay(ptr::null());
+            if x11dpy.is_null() {
+                return;
+            }
+            let mut attributes: xlib::XWindowAttributes = mem::zeroed();
+            xlib::XGetWindowAttributes(x11dpy, parent, &mut attributes);
+            window_width = attributes.width;
+            window_height = attributes.height;
+        }
+    }
+
     let mut glfw = glfw::init(glfw::fail_on_errors).unwrap();
     glfw.window_hint(glfw::WindowHint::ContextVersion(3, 3));
     glfw.window_hint(glfw::WindowHint::OpenGlProfile(glfw::OpenGlProfileHint::Core));
 
+    if embedded {
+        glfw.window_hint(glfw::WindowHint::Visible(false));
+        glfw.window_hint(glfw::WindowHint::Decorated(false));
+        glfw.window_hint(glfw::WindowHint::Focused(false));
+    }
+
     let (mut window, _events) = glfw.create_window(800, 600, "arthropods", glfw::WindowMode::Windowed).unwrap();
+
+    if embedded {
+        unsafe {
+            let native: xlib::Window = window.get_x11_window() as xlib::Window;
+            xlib::XReparentWindow(x11dpy, native, parent, 0, 0);
+            xlib::XResizeWindow(x11dpy, native, window_width as u32, window_height as u32);
+            xlib::XMapWindow(x11dpy, native);
+            xlib::XFlush(x11dpy);
+        }
+    }
+
     window.make_current();
     window.set_framebuffer_size_polling(true);
     gl::load_with(|s| {
@@ -174,5 +215,11 @@ fn main() {
 
         window.swap_buffers();
         glfw.poll_events();
+    }
+
+    if embedded {
+        unsafe {
+            xlib::XCloseDisplay(x11dpy);
+        }
     }
 }
